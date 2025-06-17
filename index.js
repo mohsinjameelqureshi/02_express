@@ -1,13 +1,17 @@
 import express from "express";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 app.use(express.json());
 
 let teaData = [];
 let nextId = 1;
 
-// Adding teas
+// Add a new tea
 app.post("/teas", (req, res) => {
   const { name, price } = req.body;
   const newTea = { id: nextId++, name, price };
@@ -15,28 +19,23 @@ app.post("/teas", (req, res) => {
   res.status(200).send(newTea);
 });
 
-// Get All teas
+// Get all teas
 app.get("/teas", (req, res) => {
   res.status(200).send(teaData);
 });
 
-// Get a specific tea with id
+// Get tea by ID
 app.get("/teas/:id", (req, res) => {
   const tea = teaData.find((t) => t.id === parseInt(req.params.id));
-
-  if (!tea) {
-    return res.status(404).send("Tea no found!!!");
-  }
+  if (!tea) return res.status(404).send("Tea not found!!!");
   res.status(200).send(tea);
 });
 
-// update a tea
+// Update tea by ID
 app.put("/teas/:id", (req, res) => {
   const tea = teaData.find((t) => t.id === parseInt(req.params.id));
-  if (!tea) {
-    return res.status(404).send("Tea no found!!!");
-  }
-  console.log(req.body);
+  if (!tea) return res.status(404).send("Tea not found!!!");
+
   const { name, price } = req.body;
   tea.name = name;
   tea.price = price;
@@ -44,17 +43,15 @@ app.put("/teas/:id", (req, res) => {
   res.status(200).send(tea);
 });
 
-// delete tea
+// Delete tea by ID
 app.delete("/teas/:id", (req, res) => {
   const teaIndex = teaData.findIndex((t) => t.id === parseInt(req.params.id));
-  console.log(teaIndex);
-  if (teaIndex === -1) {
-    return res.status(404).send("Tea no found!!!");
-  }
+  if (teaIndex === -1) return res.status(404).send("Tea not found!!!");
+
   teaData.splice(teaIndex, 1);
-  res.status(204).send("Tea Deleted");
+  res.status(204).send(); // 204 should not send a body
 });
 
 app.listen(port, () => {
-  console.log(`server is running at port: ${port}...`);
+  console.log(`Server is running at port: ${port}...`);
 });
